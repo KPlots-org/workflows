@@ -4,3 +4,15 @@
  * This is a general purpose Gradle build.
  * To learn more about Gradle by exploring our Samples at https://docs.gradle.org/8.4/samples
  */
+
+plugins {
+    id("com.github.ben-manes.versions") version "0.39.0"
+}
+
+tasks.register("getGitTag") {
+    doLast {
+        val result = "git describe --tags --abbrev=0".execute()
+        val tag = result.text.trim()
+        project.extra.set("gitTag", tag)
+    }
+}
