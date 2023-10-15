@@ -24,7 +24,7 @@ jobs:
       run: ./gradlew build
 
     - name: Extract Gradle version
-      uses: thecodemonkey/action-get-gradle-version@master     # <- USE THIS ACTION TO READ THE VERSION FROM BUILD.GRADLE
+      uses: KPlots-org/action-get-gradle-kts-version@v2     
       id: version 
 
     - run: 'echo version ${{ steps.version.outputs.version }}'
