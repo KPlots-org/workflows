@@ -71,6 +71,7 @@ jobs:
   create_release:
     needs: tag_version
     runs-on: ubuntu-latest
+    if: (needs.tag_version.outputs == 'false')
     steps:
       - name: 🛎️ Create release
         uses: ncipollo/release-action@v1
