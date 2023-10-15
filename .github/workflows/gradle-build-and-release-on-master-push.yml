@@ -49,7 +49,7 @@ jobs:
           name: release-artifact
           # jars with the suffix -dev are not remapped by paperweight and therefore useless
           path: |
-            build/libs/*.jar
+            build/libs/
             !build/libs/*-dev.jar
           retention-days: 1
 
@@ -114,4 +114,4 @@ jobs:
           tag: ${{ needs.tag_version.outputs.tag }}
           draft: false
           artifacts:
-            build/libs/*.jar
+            build/libs/*
