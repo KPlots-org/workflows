@@ -18,27 +18,16 @@ jobs:
       with:
         java-version: 17
         distribution: corretto
-
-    - name: Execute Gradle Custom Task
-      run: ./gradlew getGitTag
-      id: git_tag
-
-    - name: Display Git Tag
-      run: echo "Git Tag:\ ${{ steps.git_tag.outputs.gitTag }}"
-
-    - name: Build with Gradle
+    - name: Build Gradle project
       run: ./gradlew build
+  
+    - name: Extract Gradle version
+      id: gradle-version
+      run: echo "::set-output name=version::$(grep -Po 'version = "\K[^"]+' build.gradle.kts)"
 
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      id: create-release
+      uses: softprops/action-gh-release@v1
       with:
-        files: build/libs/*.jar  # Adjust the file extension to match your artifact
-        tag_name: ${{ steps.git_tag.outputs.gitTag }}
-        release_name: Release ${{ steps.git_tag.outputs.gitTag }}
-        body: |
-          Release notes for version ${{ steps.git_tag.outputs.gitTag }}
-          - Add feature A
-          - Fix bug B
+        files: build/libs/*  # Modify this pattern to match your build output
+        tag_name: ${{ steps.gradle-version.outputs.version }}
