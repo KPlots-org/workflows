@@ -105,6 +105,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: release-artifact
+          path: release-artifact
 
       - name: 🛎️ Create release
         id: create-release
@@ -113,5 +114,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.tag_version.outputs.tag }}
           draft: false
-          artifacts:
-            build/libs/*
+          artifacts: "release-artifact.zip"
