@@ -114,4 +114,4 @@ jobs:
           tag: ${{ needs.tag_version.outputs.tag }}
           draft: false
           artifacts:
-            release-artifact
+            build/libs/*.jar
