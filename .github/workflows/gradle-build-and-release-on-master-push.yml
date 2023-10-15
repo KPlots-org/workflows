@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      tag: v${{ steps.gradle-version.outputs.version }}
+      version: ${{ steps.version.outputs.version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -19,12 +19,15 @@ jobs:
       with:
         java-version: 17
         distribution: corretto
+    
     - name: Build Gradle project
       run: ./gradlew build
-  
+
     - name: Extract Gradle version
-      id: gradle-version
-      run: echo "::set-output name=version::$(grep -Po 'version = "\K[^"]+' build.gradle.kts)"
+      uses: thecodemonkey/action-get-gradle-version@master     # <- USE THIS ACTION TO READ THE VERSION FROM BUILD.GRADLE
+      id: version 
+
+    - run: 'echo version ${{ steps.version.outputs.version }}'
 
   tag_version:
     needs: build
@@ -37,7 +40,7 @@ jobs:
         id: check_tag
         uses: mukunku/tag-exists-action@v1.0.0
         with:
-          tag: ${{ needs.build.outputs.tag }}
+          tag: ${{ needs.build.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: 🔖 Tag version
@@ -46,7 +49,7 @@ jobs:
         uses: anothrNick/github-tag-action@1.34.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CUSTOM_TAG: ${{ needs.build.outputs.tag }}
+          CUSTOM_TAG: ${{ needs.build.outputs.version }}
       - name: ⚙️ Check created tag
         id: check_tagged
         run: |
