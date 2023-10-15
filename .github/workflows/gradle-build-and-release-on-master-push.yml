@@ -10,71 +10,71 @@ permissions:
 
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: 17
-        distribution: corretto
-    
-    - name: Build Gradle project
-      run: ./gradlew build
-
-    - name: Extract Gradle version
-      id: version   
-      uses: KPlots-org/action-get-gradle-kts-version@v2     
-      with:
-        file: build.gradle.kts
-
-    - run: 'echo version ${{ steps.version.outputs.version }}'
-
-  tag_version:
-    needs: build
-    runs-on: ubuntu-latest
-    outputs:
-      tagged: ${{ steps.check_tagged.outputs.tagged }}
-      tag: ${{ steps.tag.outputs.result }}
-    steps:
-      - name: ⚙️ Check tag exists
-        id: check_tag
-        uses: mukunku/tag-exists-action@v1.0.0
-        with:
-          tag: ${{ needs.build.outputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🔖 Tag version
-        id: tag
-        if: ${{ steps.check_tag.outputs.exists == 'false' }}
-        uses: actions/github-script@v5
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ needs.build.outputs.version }}',
-              sha: context.sha
-            })
-
-      - name: ⚙️ Check created tag
-        id: check_tagged
-        run: |
-          echo "::set-output name=tagged::${{ (steps.check_tag.outputs.exists == 'false') && (steps.tag.outputs.result == needs.build.outputs.version) }}"
+#  build:
+#    runs-on: ubuntu-latest
+#    outputs:
+#      version: ${{ steps.version.outputs.version }}
+#    steps:
+#    - name: Checkout code
+#      uses: actions/checkout@v4
+#
+#    - name: Set up JDK
+#      uses: actions/setup-java@v3
+#      with:
+#        java-version: 17
+#        distribution: corretto
+#    
+#    - name: Build Gradle project
+#      run: ./gradlew build
+#
+#    - name: Extract Gradle version
+#      id: version   
+#      uses: KPlots-org/action-get-gradle-kts-version@v2     
+#      with:
+#        file: build.gradle.kts
+#
+#    - run: 'echo version ${{ steps.version.outputs.version }}'
+#
+#  tag_version:
+#    needs: build
+#    runs-on: ubuntu-latest
+#    outputs:
+#      tagged: ${{ steps.check_tagged.outputs.tagged }}
+#      tag: ${{ steps.tag.outputs.result }}
+#    steps:
+#      - name: ⚙️ Check tag exists
+#        id: check_tag
+#        uses: mukunku/tag-exists-action@v1.0.0
+#        with:
+#          tag: ${{ needs.build.outputs.version }}
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: 🔖 Tag version
+#        id: tag
+#        if: ${{ steps.check_tag.outputs.exists == 'false' }}
+#        uses: actions/github-script@v5
+#        with:
+#          script: |
+#            github.rest.git.createRef({
+#              owner: context.repo.owner,
+#              repo: context.repo.repo,
+#              ref: 'refs/tags/${{ needs.build.outputs.version }}',
+#              sha: context.sha
+#            })
+#
+#      - name: ⚙️ Check created tag
+#        id: check_tagged
+#        run: |
+#          echo "::set-output name=tagged::${{ (steps.check_tag.outputs.exists == 'false') && (steps.tag.outputs.result == needs.build.outputs.version) }}"
   
   create_release:
-    needs: tag_version
+    #needs: tag_version
     runs-on: ubuntu-latest
     steps:
       - name: 🛎️ Create release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.tag_version.outputs.tag }}
+          tag: 1
           draft: true
