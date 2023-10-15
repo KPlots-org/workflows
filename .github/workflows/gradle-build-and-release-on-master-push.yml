@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tagged: ${{ steps.check_tagged.outputs.tagged }}
-      tag: ${{ steps.tag.outputs.new_tag }}
+      tag: ${{ steps.tag.outputs.result }}
     steps:
       - name: ⚙️ Check tag exists
         id: check_tag
@@ -55,15 +55,14 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/<tagname>',
-              sha: context.sha,
-              tagname: v${{ needs.build.outputs.version }}
+              ref: 'refs/tags/${{ needs.build.outputs.version }}',
+              sha: context.sha
             })
 
       - name: ⚙️ Check created tag
         id: check_tagged
         run: |
-          echo "::set-output name=tagged::${{ (steps.check_tag.outputs.exists == 'false') && (steps.tag.outputs.new_tag == steps.tag.outputs.tag) }}"
+          echo "::set-output name=tagged::${{ (steps.check_tag.outputs.exists == 'false') && (steps.tag.outputs.result == needs.build.outputs.version) }}"
   
   create_release:
     needs: tag_version
