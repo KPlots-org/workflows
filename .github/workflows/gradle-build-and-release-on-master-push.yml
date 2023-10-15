@@ -1,0 +1,44 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: 17
+        distribution: corretto
+
+    - name: Execute Gradle Custom Task
+      run: ./gradlew getGitTag
+      id: git_tag
+
+    - name: Display Git Tag
+      run: echo "Git Tag:\ ${{ steps.git_tag.outputs.gitTag }}"
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: build/libs/*.jar  # Adjust the file extension to match your artifact
+        tag_name: ${{ steps.git_tag.outputs.gitTag }}
+        release_name: Release ${{ steps.git_tag.outputs.gitTag }}
+        body: |
+          Release notes for version ${{ steps.git_tag.outputs.gitTag }}
+          - Add feature A
+          - Fix bug B
