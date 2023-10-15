@@ -1,46 +1,71 @@
 name: Build and Release
 
-on:
-  push:
-    branches:
-      - master
+#
+# This workflow triggers when something is pushed to master and does the following:
+#  - builds the project with JDK 17 and gradle
+#  - create a tag with the gradle version number 
+#  - release the newly build artifacts under the tag
+#
+
+on: 
+  push: 
+    branches: [master]
 
 permissions:
+  # needed to create the release
   contents: write
 
 
 jobs:
+  # Builds the project with JDK 17 and gradle
   build:
     runs-on: ubuntu-latest
+
     outputs:
       version: ${{ steps.version.outputs.version }}
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: 17
-        distribution: corretto
     
-    - name: Build Gradle project
-      run: ./gradlew build
+    steps:
+      - name: 💼 Checkout code
+        uses: actions/checkout@v4
+  
+      - name: 🧰 Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: corretto
+      
+      - name: 🔨 Build Gradle project
+        run: ./gradlew build
+  
+      - name: 📖 Extract Gradle version
+        id: version   
+        uses: KPlots-org/action-get-gradle-kts-version@v3     
+        with:
+          file: build.gradle.kts
+      
+      - name: 💾 Save artifact in storage
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-artifact
+          # jars with the suffix -dev are not remapped by paperweight and therefore useless
+          path: |
+            build/libs/*.jar
+            !build/libs/*-dev.jar
+          retention-days: 1
 
-    - name: Extract Gradle version
-      id: version   
-      uses: KPlots-org/action-get-gradle-kts-version@v3     
-      with:
-        file: build.gradle.kts
-
-    - run: 'echo version ${{ steps.version.outputs.version }}'
-
+  # Creates the tag the release will be published under
   tag_version:
+
     needs: build
+    
     runs-on: ubuntu-latest
+    
     outputs:
+      # Whether the tag was created or not
       tagged: ${{ steps.check_tagged.outputs.tagged }}
+      # The tag, if created
       tag: ${{ steps.tag.outputs.version }}
+    
     steps:
       - name: ⚙️ Check tag exists
         id: check_tag
@@ -50,19 +75,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      #- name: 🔖 Tag version
-      #  id: tag
-      #  if: ${{ steps.check_tag.outputs.exists == 'false' }}
-      #  uses: actions/github-script@v5
-      #  with:
-      #    script: |
-      #      github.rest.git.createRef({
-      #        owner: context.repo.owner,
-      #        repo: context.repo.repo,
-      #        ref: 'refs/tags/${{ needs.build.outputs.version }}',
-      #        sha: context.sha
-      #      })
-      - name: Create Tag from version
+      - name: 🔧 Create Tag from version
         id: tag
         uses: jaywcjlove/create-tag-action@v1.3.19
         if: ${{ steps.check_tag.outputs.exists == 'false' }}
@@ -70,21 +83,35 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ needs.build.outputs.version }}
 
-
       - name: ⚙️ Check created tag
         id: check_tagged
         run: |
           echo "::set-output name=tagged::${{ (steps.check_tag.outputs.exists == 'false')}}"
-      - run: echo ${{ steps.tag.outputs.version }} 
 
+  # Creates and publishes the release
   create_release:
+
     needs: tag_version
+    
     runs-on: ubuntu-latest
+    
+    # Only run if a tag was created
     if: (needs.tag_version.outputs.tagged == 'true')
+    
     steps:
+    
+      - name: 🢃 Download the new build from storage
+        id: download-artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: release-artifact
+
       - name: 🛎️ Create release
+        id: create-release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.tag_version.outputs.tag }}
           draft: false
+          artifacts:
+            release-artifact

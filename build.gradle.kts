@@ -5,4 +5,25 @@
  * To learn more about Gradle by exploring our Samples at https://docs.gradle.org/8.4/samples
  */
 
-version = "1.0.4"
+plugins {
+    kotlin("jvm") version "1.9.10"
+}
+
+version = "1.0.5"
+
+tasks {
+    jar {
+        manifest {
+            attributes["Main-Class"] = "org.example.test.MainKt"
+        }
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(sourceSets.main.get().output)
+        dependsOn(configurations.runtimeClasspath)
+        from({
+            configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+        })
+    }
+}
+
+
