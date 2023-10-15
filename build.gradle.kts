@@ -9,6 +9,10 @@ plugins {
     kotlin("jvm") version "1.9.10"
 }
 
+repositories {
+    mavenCentral()
+}
+
 version = "1.0.5"
 
 tasks {
