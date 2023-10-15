@@ -5,4 +5,4 @@
  * To learn more about Gradle by exploring our Samples at https://docs.gradle.org/8.4/samples
  */
 
-version = 1.0.0
+version = "1.0.0"
