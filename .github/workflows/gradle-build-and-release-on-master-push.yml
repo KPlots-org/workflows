@@ -77,4 +77,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: 1
-          draft: true
+          draft: false
