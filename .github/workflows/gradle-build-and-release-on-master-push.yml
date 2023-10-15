@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tagged: ${{ steps.check_tagged.outputs.tagged }}
-      tag: ${{ steps.tag.outputs.result }}
+      tag: ${{ steps.tag.outputs.version }}
     steps:
       - name: ⚙️ Check tag exists
         id: check_tag
@@ -50,24 +50,32 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🔖 Tag version
+      #- name: 🔖 Tag version
+      #  id: tag
+      #  if: ${{ steps.check_tag.outputs.exists == 'false' }}
+      #  uses: actions/github-script@v5
+      #  with:
+      #    script: |
+      #      github.rest.git.createRef({
+      #        owner: context.repo.owner,
+      #        repo: context.repo.repo,
+      #        ref: 'refs/tags/${{ needs.build.outputs.version }}',
+      #        sha: context.sha
+      #      })
+      - name: Create Tag from version
         id: tag
+        uses: jaywcjlove/create-tag-action@v1.3.19
         if: ${{ steps.check_tag.outputs.exists == 'false' }}
-        uses: actions/github-script@v5
         with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ needs.build.outputs.version }}',
-              sha: context.sha
-            })
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ needs.build.outputs.version }}
+
 
       - name: ⚙️ Check created tag
         id: check_tagged
         run: |
           echo "::set-output name=tagged::${{ (steps.check_tag.outputs.exists == 'false')}}"
-      - run: echo ${{ steps.tag.outputs.result }} 
+      - run: echo ${{ steps.tag.outputs.version }} 
 
   create_release:
     needs: tag_version
