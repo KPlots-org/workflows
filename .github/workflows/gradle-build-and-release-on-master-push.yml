@@ -8,7 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    outputs:
+      tag: v${{ steps.gradle-version.outputs.version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -25,9 +26,40 @@ jobs:
       id: gradle-version
       run: echo "::set-output name=version::$(grep -Po 'version = "\K[^"]+' build.gradle.kts)"
 
-    - name: Create Release
-      id: create-release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: build/libs/*  # Modify this pattern to match your build output
-        tag_name: ${{ steps.gradle-version.outputs.version }}
+  tag_version:
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      tagged: ${{ steps.check_tagged.outputs.tagged }}
+      tag: ${{ steps.tag.outputs.new_tag }}
+    steps:
+      - name: ⚙️ Check tag exists
+        id: check_tag
+        uses: mukunku/tag-exists-action@v1.0.0
+        with:
+          tag: ${{ needs.build.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 🔖 Tag version
+        id: tag
+        if: ${{ steps.check_tag.outputs.exists == 'false' }}
+        uses: anothrNick/github-tag-action@1.34.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CUSTOM_TAG: ${{ needs.build.outputs.tag }}
+      - name: ⚙️ Check created tag
+        id: check_tagged
+        run: |
+          echo "::set-output name=tagged::${{ (steps.check_tag.outputs.exists == 'false') && (steps.tag.outputs.new_tag == steps.tag.outputs.tag) }}"
+  
+  create_release:
+    needs: tag_version
+    if: ${{ needs.tag_version.outputs.tagged == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Create release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.tag_version.outputs.tag }}
+          draft: true
