@@ -66,12 +66,12 @@ jobs:
       - name: ⚙️ Check created tag
         id: check_tagged
         run: |
-          echo "::set-output name=tagged::${{ (steps.check_tag.outputs.exists == 'false') && (steps.tag.outputs.result == needs.build.outputs.version) }}"
+          echo "::set-output name=tagged::${{ (steps.check_tag.outputs.exists == 'false')}}"
   
   create_release:
     needs: tag_version
     runs-on: ubuntu-latest
-    if: (needs.tag_version.outputs == 'false')
+    if: (needs.tag_version.outputs.tagged == 'true')
     steps:
       - name: 🛎️ Create release
         uses: ncipollo/release-action@v1
