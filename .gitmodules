@@ -1,3 +1,6 @@
 [submodule "action-get-gradle-kts-version"]
 	path = action-get-gradle-kts-version
 	url = git@github.com:KPlots-org/action-get-gradle-kts-version.git
+[submodule "check-sign-off"]
+	path = check-sign-off
+	url = git@github.com:KPlots-org/check-sign-off.git

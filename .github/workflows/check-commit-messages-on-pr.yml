@@ -27,18 +27,22 @@ jobs:
             commits: ${{ steps.get-pr-commits.outputs.commits }}
             pattern: '^(feat|fix|doc|style|refactor|perf|test|ci|chore|revert)(?:\s*\(?\w+\)?)?!?:\s.+'
             error: "Commits MUST start with a noun (feat|fix|doc|style|refactor|perf|test|ci|chore|revert) followed by an optional scope, an exclamation mark if the change is breaking and colon+whitepace"
+  
+  
   verify-signed-off:
     runs-on: ubuntu-latest
+    outputs: 
+      all-commits-signed-off: ${{ steps.check-sign-off.outputs.all-commits-signed-off }}
     steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Get PR Commits
+        id: 'get-pr-commits'
+        uses: tim-actions/get-pr-commits@master
         with:
-          node-version: '14'  # You can specify a different Node.js version if needed
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run GitHub Action
-        run: node check_signed_off.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check Commits for Signoff
+        if: 'check-sign-off'
+        uses: kplots-org/check-sign-off@0.0.1
+        with:
+          commits: ${{ steps.get-pr-commits.outputs.commits }}
+      - run: echo ${{ outputs.all-commits-signed-off }}
+      - run: echo ${{ steps.check-sign-off.outputs.all-commits-signed-off }}
