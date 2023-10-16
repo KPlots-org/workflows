@@ -9,7 +9,7 @@ on:
       - synchronize
 
 jobs:
-  check-commit-message:
+  conventional-commits:
       name: Check Commit Message
       runs-on: ubuntu-latest
       steps:
@@ -27,12 +27,18 @@ jobs:
             commits: ${{ steps.get-pr-commits.outputs.commits }}
             pattern: '^(feat|fix|doc|style|refactor|perf|test|ci|chore|revert)(?:\s*\(?\w+\)?)?!?:\s.+'
             error: "Commits MUST start with a noun (feat|fix|doc|style|refactor|perf|test|ci|chore|revert) followed by an optional scope, an exclamation mark if the change is breaking and colon+whitepace"
+  verify-signed-off:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'  # You can specify a different Node.js version if needed
 
-        - name: Check if commit is signed off
-          if: ${{ success() || failure() }}
-          uses: tim-actions/commit-message-checker-with-regex@v0.3.1
-          with:
-            commits: ${{ steps.get-pr-commits.outputs.commits }}
-            pattern: '^Signed-off-by: .+$'
-            error: 'Commits MUST be signed off by the author and/or owners of the code'
-            one_pass_all_pass: 'true'
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run GitHub Action
+        run: node check_signed_off.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
