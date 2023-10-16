@@ -60,8 +60,8 @@ jobs:
     - uses: superbrothers/close-pull-request@v3
       with:
         comment: |
-          "This PR is automatically closed because your commits do not conform with our standards."
-          "You either:"
-          "  - forgot to sign off your commits."
-          "  - did not stick to conventional commit messages."
-          "Please read the KPlots commit guidelines carefully before opening a new PR."
+          This PR is automatically closed because your commits do not conform with our standards.
+          You either:
+            - forgot to sign off your commits.
+            - did not stick to conventional commit messages.
+          Please read the KPlots commit guidelines carefully before opening a new PR.
