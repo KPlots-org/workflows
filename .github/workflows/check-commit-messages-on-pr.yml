@@ -52,6 +52,7 @@ jobs:
 
   
   close-if-failure:
+    permissions: write-all
     needs: [verify-signed-off, conventional-commits]
     runs-on: ubuntu-latest
     if: failure() && needs.conventional-commits.result != 'success' || needs.verify-signed-off.result != 'success'
