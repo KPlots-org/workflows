@@ -1,7 +1,7 @@
 name: Check Commit message format
 
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - reopened
@@ -49,19 +49,3 @@ jobs:
           pattern: 'Signed-off-by:\s+\b\w+(?:\s+\w+)*\s*<[^<>]+>'
           error: "All Commits must include a Signed-off-by line"
           one_pass_all_pass: 'false'
-
-  
-  close-if-failure:
-    permissions: write-all
-    needs: [verify-signed-off, conventional-commits]
-    runs-on: ubuntu-latest
-    if: failure() && needs.conventional-commits.result != 'success' || needs.verify-signed-off.result != 'success'
-    steps:
-    - uses: superbrothers/close-pull-request@v3
-      with:
-        comment: |
-          This PR is automatically closed because your commits do not conform with our standards.
-          You either:
-            - forgot to sign off your commits.
-            - did not stick to conventional commit messages.
-          Please read the KPlots commit guidelines carefully before opening a new PR.
