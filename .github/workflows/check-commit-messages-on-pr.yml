@@ -47,7 +47,7 @@ jobs:
       - run: echo ${{ steps.check-sign-off.outputs.all-commits-signed-off }}
   
   close-if-failure:
-    needs: [verify-signed-off, conventional-commit]
+    needs: [verify-signed-off, conventional-commits]
     runs-on: ubuntu-latest
     if: ${{needs.first-job.result != 'success' || needs.verify-signed-off.outputs.all-commits-signed-off != 'true'}}
     steps:
