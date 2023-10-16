@@ -40,7 +40,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Check Commits for Signoff
-        if: 'check-sign-off'
+        id: 'check-sign-off'
         uses: kplots-org/check-sign-off@0.0.1
         with:
           commits: ${{ steps.get-pr-commits.outputs.commits }}
