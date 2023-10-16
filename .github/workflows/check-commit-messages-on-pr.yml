@@ -44,5 +44,4 @@ jobs:
         uses: kplots-org/check-sign-off@0.0.1
         with:
           commits: ${{ steps.get-pr-commits.outputs.commits }}
-      - run: echo ${{ outputs.all-commits-signed-off }}
       - run: echo ${{ steps.check-sign-off.outputs.all-commits-signed-off }}
