@@ -41,7 +41,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Check Commits for Signoff
         id: 'check-sign-off'
-        uses: kplots-org/check-sign-off@0.0.2
+        uses: kplots-org/check-sign-off@0.0.3
         with:
           commits: ${{ steps.get-pr-commits.outputs.commits }}
       - run: echo ${{ steps.check-sign-off.outputs.all-commits-signed-off }}
