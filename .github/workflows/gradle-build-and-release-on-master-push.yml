@@ -4,7 +4,7 @@ name: Build and Release
 # This workflow triggers when something is pushed to master and does the following:
 #  - builds the project with JDK 17 and gradle
 #  - create a tag with the gradle version number 
-#  - release the newly build artifacts under the tag
+#  - release the newly built artifacts under the tag
 #
 
 on: 
